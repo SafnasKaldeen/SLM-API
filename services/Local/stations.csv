@@ -1,0 +1,32 @@
+station_id,station_model,station_name,latitude,longitude,location_name,city,district,province,active
+02f84e8f-6948-4681-9b8c-e2fc681828c8,EZR-SWAP-01,Bandaragama Station,6.71485271,79.98912407,Bandaragama,Bandaragama,Kalutara,Western Province,1
+208bbb7b-6cc0-4e50-8957-546060ed8ec5,EZR-SWAP-01,MockStation,6.91484514,79.87645094,Borella,Colombo 08,Colombo,Western Province,1
+3b20d577-e9fd-4e57-a26a-3f6fdcb238dd,EZR-SWAP-01,Agalawaththa,6.53511873,80.15020067,Agalawaththa,Agalawatta,Kalutara,Western Province,1
+435b9f43-ffba-479d-82b4-861a775d9246,EZR-SWAP-01,Kuliyapitiya,7.47003476,80.02660552,Kuliyapitiya,Kuliyapitiya,Kurunegala,North Western Province,1
+47739321-e47f-4dc7-940c-ba5e20019f24,EZR-SWAP-01,Beruwala Station,6.47436534,79.98394793,Beruwala,Beruwala,Kalutara,Western Province,1
+521a531a-6da1-43cb-84bb-21eb7f1fe279,EZR-SWAP-01,Minuwangoda Station,7.18259112,79.96116512,Minuwangoda,Minuwangoda,Gampaha,Western Province,1
+5589d6eb-0eca-4053-84cf-db8ec8161ecc,EZR-SWAP-01,Padukka Station,6.84179341,80.10289527,Padukka,Padukka,Colombo Suburbs,Western Province,1
+63bd23a3-b7f6-4e1b-bdcd-c6ad4f8cac3b,EZR-SWAP-01,Miriswatta Station,7.07287165,80.01556976,Miriswatta,Yakkala,Gampaha,Western Province,1
+68b46d0b-1867-47ba-9892-1cc19e63e88f,EZR-SWAP-01,Soysapura Station,6.80553772,79.88515692,Soysapura,Moratuwa,Colombo Suburbs,Western Province,1
+741e6059-1d95-4d33-9ba0-d0c94c72a23d,EZR-SWAP-01,Kolonnawa Station,6.93681003,79.89582915,Kolonnawa,Kolonnawa,Colombo Suburbs,Western Province,1
+7dc97ec3-6e86-415a-92cc-81abc20c0409,EZR-SWAP-01,Kalutara North,6.59857066,79.95777805,Kaluthara,Kalutara,Kalutara,Western Province,1
+7fd4e109-deb6-4419-a6cf-0023c3641443,EZR-SWAP-01,Thalawathugoda New Station,6.87787188,79.93962858,Thalawathugoda,Talawatugoda,Colombo Suburbs,Western Province,1
+7fe25efe-388c-416b-8683-3a6f526ef1dc,EZR-SWAP-01,Kiribathgoda Station,6.97874364,79.93014964,Kiribathgoda,Kiribathgoda,Gampaha,Western Province,1
+8020b878-1536-46ae-9407-743e11684d30,EZR-SWAP-01,Panadura,6.71005344,79.91515661,Panadura,Panadura,Kalutara,Western Province,1
+80eb48a8-9095-4c75-b51f-2d2843af2aca,EZR-SWAP-01,Katunayake Station,7.15512227,79.87173105,Katunayake Station,Katunayake,Gampaha,Western Province,1
+83fd891c-55cb-4792-86cd-deea6365c076,EZR-SWAP-01,Udugampola Station,7.1204871,79.98394078,Udugampola,Udugampola,Gampaha,Western Province,1
+85e4c3a1-9838-4d28-a6af-134ce7d268d0,EZR-SWAP-01,Kadawatha Station,7.00671772,79.95820248,Kadawatha,Kadawatha,Gampaha,Western Province,1
+886ec9e7-7293-470c-8332-ed12bf331164,EZR-SWAP-01,Kochchikade Station,7.27420494,79.86249997,Waikkala,Kochchikade,Gampaha,Western Province,1
+98deea01-73d2-48b9-8f7c-ac062ea76a1f,EZR-SWAP-01,Panadura  1 Station,6.71005344,79.91515661,Panadura,Panadura,Kalutara,Western Province,1
+98fc3c05-3968-45e0-a49e-8008a37f7a1a,EZR-SWAP-01,Boralla Temporary Station,6.91484514,79.87645094,Borella,Colombo 08,Colombo,Western Province,1
+a43be717-7641-4abc-a63d-838f01006d30,EZR-SWAP-01,Seeduwa Station,7.13293467,79.88834649,Seeduwa,Seeduwa,Gampaha,Western Province,1
+ac80778a-18b5-455b-8318-f64dd3f6eb63,EZR-SWAP-01,Boralesgamuwa new Station,6.83702395,79.9037056,Boralesgamuwa,Boralesgamuwa,Colombo Suburbs,Western Province,1
+b0ef2186-60de-49f3-9376-753caf2c4122,EZR-SWAP-01,Kurunagala Station,7.48035822,80.35044315,Kurunagala,Kurunegala,Kurunegala,North Western Province,1
+b4f4518b-d8ab-4f43-a9d4-97d490bb3c7e,EZR-SWAP-01,Negambo,6.87787188,79.93962858,Thalawathugoda,Talawatugoda,Colombo Suburbs,Western Province,1
+bd990ab0-f19d-4bdd-be15-e752a5bbfc83,EZR-SWAP-01,Maggona,6.50737779,79.9813342,Maggona,Maggona,Kalutara,Western Province,1
+c020c4a7-2c8d-462e-b271-03b1d61df8b4,EZR-SWAP-01,Factory25,6.92143363,79.89300972,SLMobility Factory,Rajagiriya,Colombo Suburbs,Western Province,1
+cd9acff9-b76c-4d92-a40a-da5e2f6dcdb4,EZR-SWAP-01,Paliayagoda Station,6.96105626,79.88089198,Paliayagoda,Wattala,Gampaha,Western Province,1
+d0ae419a-2556-4395-b928-808f755f15cc,EZR-SWAP-01,Divulapitiya New Station,7.22238464,80.01765306,Divulapitiya,Divulapitiya,Gampaha,Western Province,1
+def67a06-d63e-48ae-8dba-e9cc4e38a7ca,EZR-SWAP-01,Factory27,6.92143363,79.89300972,SLMobility Factory,Rajagiriya,Colombo Suburbs,Western Province,1
+df940c09-9423-440d-b6fb-ab8ad0623834,EZR-SWAP-01,Moratuwa replace Station,6.78786301,79.88527125,Moratuwa,Moratuwa,Colombo Suburbs,Western Province,1
+f2fe3dda-b83b-4b8c-ad50-07277c7ebc42,EZR-SWAP-01,Dharga Town Station,6.44120295,80.01102819,Dharga Town,Alutgama,Kalutara,Western Province,1
