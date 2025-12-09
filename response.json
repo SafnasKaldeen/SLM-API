@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "distance_km": 83.08,
+  "message": "Route planned successfully.",
+  "planned_charging_stops_count": 1,
+  "route_summary": [
+    {
+      "location": "(6.9271, 79.8612)",
+      "category": "Source",
+      "battery_on_arrival_percent": 25.0,
+      "battery_on_departure_percent": 25.0,
+      "next_stop_distance_km": 4.34
+    },
+    {
+      "location": "(6.960975, 79.880949)",
+      "category": "Visiting_Charging_Station",
+      "battery_on_arrival_percent": 21.9,
+      "battery_on_departure_percent": 100.0,
+      "next_stop_distance_km": 78.75,
+      "station_name": "Paliyagoda_Station"
+    },
+    {
+      "location": "(7.4863, 80.3623)",
+      "category": "Destination",
+      "battery_on_arrival_percent": 43.75,
+      "battery_on_departure_percent": 43.75,
+      "next_stop_distance_km": 0.0
+    }
+  ],
+  "export_message": "Data successfully uploaded to Snowflake stage: @ROUTE_PLANNER/plan.csv"
+}

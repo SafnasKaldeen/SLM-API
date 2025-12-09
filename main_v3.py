@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/")
-def home():
-    return {"message": "FastAPI working on Railway!"}
-=======
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
@@ -15,7 +6,6 @@ import json
 import os
 import sys
 import csv
-import requests
 
 # Path to the stations CSV (same folder as this script)
 STATIONS_CSV_FILE = os.path.join(os.path.dirname(__file__), "stations.csv")
@@ -24,7 +14,7 @@ STATIONS_CSV_FILE = os.path.join(os.path.dirname(__file__), "stations.csv")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Initialize FastAPI app
-app = FastAPI(title="EV Route Planner API V3 - Dynamic Efficiency with Coverage Analysis", version="3.0.0")
+app = FastAPI(title="EV Route Planner API V3 - Dynamic Efficiency", version="3.0.0")
 
 # CORS settings
 app.add_middleware(
@@ -46,20 +36,6 @@ class EnhancedEVRouteInput(BaseModel):
     output_path: Optional[str] = None
     format_: str = 'json'
     query: Optional[str] = None
-
-# Coverage Area Input Schema
-class CoverageAreaInput(BaseModel):
-    current_location: str  # "lat,lon" format
-    battery: int  # in percentage
-    efficiency: float  # km per percentage
-    max_hops: int = 10
-    safety_margin: float = 0.3
-    resolution: int = 50  # Grid resolution for polygon generation
-    analysis_type: str = "both"  # "reachable_stations", "coverage_polygon", or "both"
-    include_combined_polygon: bool = True  # NEW: Whether to generate combined polygon instead of individual station coverage
-    current_heading_degrees: Optional[float] = None  # NEW: Current heading in degrees (0-360)
-    current_speed_kmh: Optional[float] = None  # NEW: Current speed in km/h
-
 
 DEFAULT_CHARGING_STATIONS = []
 
@@ -134,22 +110,6 @@ except ImportError as e:
     print("  pip install geopy requests")
 except Exception as e:
     print(f"Unexpected error importing route service: {e}")
-    import traceback
-    traceback.print_exc()
-
-# Import Coverage Area Service
-coverage_service = None
-try:
-    from services.Local.coverage_area_service_v2 import CoverageAreaService
-    coverage_service = CoverageAreaService()
-    print("✓ Successfully imported Coverage Area Service")
-    print("✓ Advanced optimizations available: pre-filtering, caching, early termination")
-except ImportError as e:
-    print(f"Warning: Could not import Coverage Area Service: {e}")
-    print("Make sure coverage_area_service_v2.py is in the same directory")
-    print("Install dependencies: pip install scipy shapely numpy")
-except Exception as e:
-    print(f"Unexpected error importing coverage area service: {e}")
     import traceback
     traceback.print_exc()
 
@@ -291,6 +251,38 @@ def convert_service_response_to_frontend_format(service_result: str):
             "route_summary": []
         }
 
+@app.get("/")
+def root():
+    service_status = "available" if route_service is not None else "unavailable"
+    algorithm_name = service_info.get('algorithm', 'Unknown') if service_info else 'Unknown'
+    version = service_info.get('version', '3.0.0') if service_info else '3.0.0'
+    
+    return {
+        "message": "EV Route Planner API V3 - Dynamic Efficiency with Strategic Battery Utilization", 
+        "status": "running",
+        "version": version,
+        "service_available": route_service is not None,
+        "service_status": service_status,
+        "algorithm": algorithm_name,
+        "optimization_strategy": [
+            "Strategic station selection (First/Middle/Final)",
+            "Dynamic efficiency calculation (elevation + weather + traffic)",
+            "Real-time conditions integration",
+            "Intelligent battery utilization optimization"
+        ],
+        "features": [
+            "Dynamic efficiency with elevation, weather, traffic factors",
+            "Strategic battery utilization algorithms",
+            "Google Maps + OpenWeatherMap integration", 
+            "Permanent elevation caching + hourly weather updates",
+            "A* fallback with battery utilization bias",
+            "Comprehensive route analysis and reporting",
+            "Partial route analysis for infeasible routes"
+        ] if service_info else [
+            "EV Route Planning (service not loaded)"
+        ]
+    }
+
 def parse_location(location_str: str):
     """Parse a location string into (lat, lon) tuple"""
     try:
@@ -306,67 +298,16 @@ def parse_location(location_str: str):
     except Exception as e:
         raise ValueError(f"Invalid location format: {location_str}. Error: {e}")
 
-@app.get("/")
-def root():
-    service_status = "available" if route_service is not None else "unavailable"
-    coverage_status = "available" if coverage_service is not None else "unavailable"
-    algorithm_name = service_info.get('algorithm', 'Unknown') if service_info else 'Unknown'
-    version = service_info.get('version', '3.0.0') if service_info else '3.0.0'
-    
-    return {
-        "message": "EV Route Planner API V3 - Dynamic Efficiency with Strategic Battery Utilization & Coverage Analysis", 
-        "status": "running",
-        "version": version,
-        "services": {
-            "route_planning": {
-                "available": route_service is not None,
-                "status": service_status,
-                "algorithm": algorithm_name
-            },
-            "coverage_analysis": {
-                "available": coverage_service is not None,
-                "status": coverage_status,
-                "features": ["Reachability Analysis", "Coverage Polygons", "Multi-hop Pathfinding", "Optimization Engine"] if coverage_service else []
-            }
-        },
-        "optimization_strategy": [
-            "Strategic station selection (First/Middle/Final)",
-            "Dynamic efficiency calculation (elevation + weather + traffic)",
-            "Real-time conditions integration",
-            "Intelligent battery utilization optimization",
-            "Coverage area analysis with multi-hop reachability"
-        ],
-        "features": [
-            "Dynamic efficiency with elevation, weather, traffic factors",
-            "Strategic battery utilization algorithms",
-            "Google Maps + OpenWeatherMap integration", 
-            "Permanent elevation caching + hourly weather updates",
-            "A* fallback with battery utilization bias",
-            "Comprehensive route analysis and reporting",
-            "Partial route analysis for infeasible routes",
-            "Battery-aware coverage area analysis",
-            "Multi-hop reachability calculations",
-            "Optimized polygon generation with pre-filtering"
-        ] if service_info else [
-            "EV Route Planning (service not loaded)",
-            "Coverage Analysis (service not loaded)" if not coverage_service else "Coverage Analysis"
-        ]
-    }
-
 @app.get("/health")
 def health_check():
     return {
         "status": "healthy",
-        "services": {
-            "route_service_status": "available" if route_service else "unavailable",
-            "coverage_service_status": "available" if coverage_service else "unavailable"
-        },
+        "service_status": "available" if route_service else "unavailable",
         "charging_stations_count": len(DEFAULT_CHARGING_STATIONS),
         "api_version": "3.0.0",
         "algorithm": service_info.get('algorithm', 'Unknown') if service_info else 'Unknown',
-        "optimization_focus": "dynamic_efficiency_with_strategic_battery_utilization_and_coverage_analysis",
-        "cache_system": "elevation_permanent_weather_hourly" if route_service else "not_available",
-        "coverage_optimizations": "pre_filtering_early_termination_caching" if coverage_service else "not_available"
+        "optimization_focus": "dynamic_efficiency_with_strategic_battery_utilization",
+        "cache_system": "elevation_permanent_weather_hourly" if route_service else "not_available"
     }
 
 @app.post("/ev-route-plan")
@@ -480,164 +421,6 @@ def enhanced_ev_route_plan(input_data: EnhancedEVRouteInput):
             "route_summary": []
         }
 
-@app.post("/coverage-area-optimized")
-def coverage_area_optimized(input_data: CoverageAreaInput):
-    """
-    Coverage area analysis endpoint with integrated alert system + network coverage
-    Now includes overall_network_coverage showing theoretical maximum reach of infrastructure
-    """
-    try:
-        # Check if coverage service is available
-        if coverage_service is None:
-            return {
-                "success": False,
-                "message": "Coverage Area Service is not available. Please check that coverage_area_service.py exists and install dependencies: pip install scipy shapely numpy",
-                "analysis_type": input_data.analysis_type,
-                "reachable_stations": [],
-                "coverage_areas": {}
-            }
-        
-        print(f"Received Coverage Area Analysis request (with alerts + network coverage):")
-        print(f"  Current location: {input_data.current_location}")
-        print(f"  Battery: {input_data.battery}%")
-        print(f"  Efficiency: {input_data.efficiency} km/%")
-        print(f"  Max hops: {input_data.max_hops}")
-        print(f"  Safety margin: {input_data.safety_margin}")
-        print(f"  Analysis type: {input_data.analysis_type}")
-        
-        # Parse current location coordinates
-        try:
-            current_coords = parse_location(input_data.current_location)
-        except ValueError as e:
-            return {
-                "success": False,
-                "message": str(e),
-                "analysis_type": input_data.analysis_type,
-                "reachable_stations": [],
-                "coverage_areas": {}
-            }
-        
-        print(f"  Parsed location: {current_coords}")
-        
-        # Convert efficiency to km per percent
-        if 0 < input_data.efficiency <= 1:
-            km_per_percent = input_data.efficiency
-        elif input_data.efficiency > 100:
-            km_per_percent = input_data.efficiency / 100
-        else:
-            km_per_percent = input_data.efficiency
-
-        print(f"  Efficiency (km per percent): {km_per_percent}")
-        
-        # Validate analysis type
-        if input_data.analysis_type not in ["reachable_stations", "coverage_polygon", "both"]:
-            return {
-                "success": False,
-                "message": "Invalid analysis_type. Must be 'reachable_stations', 'coverage_polygon', or 'both'.",
-                "analysis_type": input_data.analysis_type,
-                "reachable_stations": [],
-                "coverage_areas": {}
-            }
-
-        # Use the MAIN INTEGRATED METHOD: analyze_safety_with_alerts
-        # This provides comprehensive analysis including alerts, coverage areas, station reachability, and network coverage
-        analysis_result = coverage_service.analyze_safety_with_alerts(
-            current_position=current_coords,
-            current_battery=float(input_data.battery),
-            efficiency_km_per_percent=input_data.efficiency,  # Convert to percent per km
-            charging_stations=DEFAULT_CHARGING_STATIONS,
-            max_hops=input_data.max_hops,
-            safety_margin=input_data.safety_margin,
-            timestamp=None,  # Uses current time
-            current_heading_degrees=input_data.current_heading_degrees if input_data.current_heading_degrees else 90.0,  # Default heading or get from input_data if available
-            current_speed_kmh=input_data.current_speed_kmh if input_data.current_speed_kmh else None,  # Get from input_data if available
-            is_moving=True,
-            include_network_coverage=True  # NEW: Include network coverage analysis
-        )
-        
-        # Calculate reachability percentage
-        total_stations = len(DEFAULT_CHARGING_STATIONS)
-        reachable_count = analysis_result['station_analysis']['reachable_stations']
-        reachability_percentage = (reachable_count / total_stations * 100) if total_stations > 0 else 0
-        
-        # Build response with ALL keys including network coverage
-        response = {
-            "success": True,
-            "message": "Coverage area analysis completed successfully with integrated alert system and network coverage",
-            "analysis_type": "both",
-            
-            "current_location": analysis_result['current_status'],
-            
-            "parameters": {
-                "max_hops": input_data.max_hops,
-                "safety_margin": input_data.safety_margin,
-                "resolution": input_data.resolution if hasattr(input_data, 'resolution') else 50,
-                "total_stations_available": total_stations
-            },
-            
-            "reachable_stations": {
-                "count": reachable_count,
-                "stations": analysis_result['station_analysis']['reachable_stations_list']
-            },
-            
-            "unreachable_stations": {
-                "count": analysis_result['station_analysis']['unreachable_stations'],
-                "stations": analysis_result['station_analysis']['unreachable_stations_list']
-            },
-            
-            "coverage_areas": {
-                "direct_coverage": analysis_result['coverage_areas']['direct_coverage'],
-                "combined_coverage_polygon": analysis_result['coverage_areas']['combined_coverage_polygon'],
-                "overall_network_coverage": analysis_result['coverage_areas']['overall_network_coverage'],  # NEW
-                "direct_coverage_points": analysis_result['coverage_areas']['direct_coverage_points'],
-                "combined_coverage_points": analysis_result['coverage_areas']['combined_coverage_points']
-            },
-            
-            # Alerts
-            "alerts": analysis_result['alerts'],
-            
-            "coverage_status": analysis_result['coverage_status'],
-            
-            "travel_metrics": analysis_result['travel_metrics'],
-            
-            # Dashboard summary
-            "dashboard_summary": analysis_result['dashboard_summary'],
-            
-            "reachability_stats": {
-                **analysis_result['reachability_stats'],
-                "total_reachable": reachable_count,
-                "total_unreachable": analysis_result['station_analysis']['unreachable_stations'],
-                "reachability_percentage": round(reachability_percentage, 1)
-            },
-            
-            "optimization_stats": analysis_result.get('optimization_stats', {}),
-            
-            "analysis_time_seconds": analysis_result['analysis_time_seconds'],
-            "timestamp": analysis_result['timestamp']
-        }
-        
-        # Log network coverage info
-        if response['coverage_areas']['overall_network_coverage']:
-            network_info = response['coverage_areas']['overall_network_coverage']
-            print(f"\nNetwork Coverage Analysis:")
-            print(f"  Network Connected: {network_info['network_connected']}")
-            print(f"  Number of Networks: {network_info['network_count']}")
-            print(f"  Total Coverage Area: {network_info['total_coverage_area_km2']} km²")
-            print(f"  Max Theoretical Range: {network_info['max_theoretical_range_km']} km")
-            
-            if network_info['network_count'] > 1:
-                print(f"  ⚠️ WARNING: Disconnected networks detected!")
-                for network in network_info['networks']:
-                    print(f"    - Network {network['network_id']}: {network['station_count']} stations, {network['coverage_area_km2']} km²")
-        
-        return response
-        
-    except Exception as e:
-        print(f"Error in coverage area analysis: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
-    
 @app.get("/stations")
 def get_all_stations():
     """Get all available charging stations"""
@@ -654,14 +437,11 @@ def get_route_capabilities():
         "service_version": "3.0.0",
         "dynamic_efficiency_algorithm": True,
         "strategic_battery_utilization": True,
-        "coverage_analysis": coverage_service is not None,
         "optimization_strategy": [
             "1. Strategic station selection (First/Middle/Final)",
             "2. Dynamic efficiency calculation (elevation + weather + traffic)", 
             "3. Real-time conditions integration",
-            "4. Battery utilization optimization",
-            "5. Multi-hop reachability analysis",
-            "6. Coverage area polygon generation"
+            "4. Battery utilization optimization"
         ],
         "efficiency_factors": [
             "Elevation profile (permanent cache)",
@@ -669,14 +449,6 @@ def get_route_capabilities():
             "Traffic patterns (time-of-day based)",
             "Base vehicle efficiency"
         ],
-        "coverage_features": [
-            "Multi-hop pathfinding with battery constraints",
-            "Reachable station analysis with optimization",
-            "Coverage polygon generation",
-            "Pre-filtering for performance",
-            "LRU caching for distance calculations",
-            "Early termination algorithms"
-        ] if coverage_service else [],
         "api_integrations": {
             "google_maps": "Distance calculation + elevation data",
             "openweather": "Weather conditions (optional)",
@@ -687,13 +459,10 @@ def get_route_capabilities():
             "Strategic station selection",
             "Real-time efficiency adaptation", 
             "Battery utilization maximization",
-            "Arrival battery optimization",
-            "Coverage area maximization",
-            "Computational efficiency"
+            "Arrival battery optimization"
         ],
         "supported_formats": ["json"],
-        "route_service_status": "available" if route_service else "unavailable",
-        "coverage_service_status": "available" if coverage_service else "unavailable"
+        "service_status": "available" if route_service else "unavailable"
     }
     
     if service_info:
@@ -705,63 +474,6 @@ def get_route_capabilities():
         })
     
     return capabilities
-
-@app.get("/coverage-capabilities")
-def get_coverage_capabilities():
-    """Get information about Coverage Area Service capabilities"""
-    if coverage_service is None:
-        return {
-            "service_available": False,
-            "message": "Coverage Area Service is not available",
-            "required_dependencies": ["scipy", "shapely", "numpy"],
-            "installation_command": "pip install scipy shapely numpy"
-        }
-    
-    return {
-        "service_available": True,
-        "service_version": "1.0.0",
-        "analysis_types": [
-            "reachable_stations",
-            "coverage_polygon", 
-            "both"
-        ],
-        "optimization_features": [
-            "Theoretical range pre-filtering",
-            "LRU cache for distance calculations",
-            "Early termination when battery insufficient", 
-            "Adaptive resolution based on station density",
-            "Batch processing for progress tracking",
-            "Intelligent sorting and prioritization"
-        ],
-        "pathfinding_algorithms": [
-            "Multi-hop BFS with battery constraints",
-            "Optimized station filtering",
-            "Direct reachability checking",
-            "Battery-aware path validation"
-        ],
-        "polygon_generation": [
-            "Convex hull boundary creation",
-            "Grid-based reachability testing",
-            "Adaptive resolution adjustment",
-            "Fallback circular boundaries"
-        ],
-        "performance_optimizations": [
-            "Pre-filtering reduces computation by 50-80%",
-            "LRU caching for distance calculations",
-            "Early termination saves unnecessary computation",
-            "Batch processing with progress indicators"
-        ],
-        "supported_parameters": {
-            "max_hops": {"min": 1, "max": 50, "default": 10},
-            "safety_margin": {"min": 0.0, "max": 0.5, "default": 0.3},
-            "resolution": {"min": 10, "max": 100, "default": 50}
-        },
-        "dependencies_status": {
-            "scipy": "available",
-            "shapely": "available", 
-            "numpy": "available"
-        }
-    }
 
 @app.get("/debug/service")
 def debug_service():
@@ -800,97 +512,43 @@ def debug_service():
     
     return debug_info
 
-@app.get("/debug/coverage-service")
-def debug_coverage_service():
-    """Debug endpoint to check Coverage Area Service status"""
-    if coverage_service is None:
-        return {
-            "service_imported": False,
-            "error": "Coverage Area Service could not be imported",
-            "suggestions": [
-                "Check that coverage_area_service_v2.py exists in the same directory",
-                "Install required dependencies: pip install scipy shapely numpy",
-                "Verify the service file contains the CoverageAreaService class",
-                "Check for import errors in the service file"
-            ]
-        }
-    
-    available_methods = [attr for attr in dir(coverage_service) if not attr.startswith('_') and callable(getattr(coverage_service, attr))]
-    
-    debug_info = {
-        "service_imported": True,
-        "service_class": "CoverageAreaService",
-        "available_methods": available_methods,
-        "optimization_stats": coverage_service.optimization_stats,
-        "cache_stats": coverage_service.cache_stats,
-        "dependencies_available": True
-    }
-    
-    # Test basic functionality
-    try:
-        test_distance = coverage_service.calculate_distance(0, 0, 1, 1)
-        debug_info["distance_calculation_test"] = {
-            "success": True,
-            "test_distance_km": round(test_distance, 2)
-        }
-    except Exception as e:
-        debug_info["distance_calculation_test"] = {
-            "success": False,
-            "error": str(e)
-        }
-    
-    return debug_info
-
-@app.get("/debug/test-coverage")
-def test_coverage_service():
-    """Test endpoint to verify coverage service functionality"""
-    if coverage_service is None:
+@app.get("/debug/test-service")
+def test_service():
+    """Test endpoint to verify service functionality"""
+    if route_service is None:
         return {
             "test_status": "failed",
-            "error": "Coverage service not available"
+            "error": "Service not available"
         }
     
     try:
-        # Test with a simple location (Colombo)
-        test_location = (6.9271, 79.8612)
-        test_battery = 80.0
-        test_efficiency = 2.0
-        test_stations = [
-            {"lat": 6.9271, "lon": 79.9612, "name": "Test Station 1"},
-            {"lat": 7.0271, "lon": 79.8612, "name": "Test Station 2"}
-        ]
-        
-        # Test reachable stations analysis
-        reachable, unreachable = coverage_service.analyze_reachable_stations_with_optimizations(
-            current_coords=test_location,
-            initial_battery_percent=test_battery,
-            efficiency_km_per_percent=test_efficiency,
-            charging_stations=test_stations,
-            max_hops=2,
-            safety_margin=0.3
+        # Test with a simple route (Colombo to nearby location)
+        test_result = call_ev_route_service_v3(
+            source="6.9271,79.8612",  # Colombo
+            destination="6.9271,79.9612",  # Slightly east of Colombo
+            battery=80.0,
+            efficiency=2.0,
+            stations_json=json.dumps([[7.148497, 79.873276], [7.182689, 79.961171]]),  # 2 test stations
+            max_charging_stops=2,
+            google_api_key=None,  # Test without API
+            openweather_api_key=None
         )
+        
+        result_data = json.loads(test_result)
         
         return {
             "test_status": "completed",
-            "test_location": test_location,
-            "test_parameters": {
-                "battery": test_battery,
-                "efficiency": test_efficiency,
-                "stations_count": len(test_stations)
-            },
-            "results": {
-                "reachable_stations": len(reachable),
-                "unreachable_stations": len(unreachable),
-                "optimization_stats": coverage_service.optimization_stats
-            },
-            "success": True
+            "success": result_data.get("success", False),
+            "message": result_data.get("message", "No message"),
+            "algorithm_used": result_data.get("algorithm_used", "Unknown"),
+            "test_distance": result_data.get("distance_km", 0),
+            "test_api_calls": result_data.get("google_api_calls_used", 0)
         }
         
     except Exception as e:
         return {
             "test_status": "error",
-            "error": str(e),
-            "success": False
+            "error": str(e)
         }
 
 if __name__ == "__main__":
@@ -902,10 +560,10 @@ if __name__ == "__main__":
     os.makedirs("services", exist_ok=True)
     os.makedirs("services/Local", exist_ok=True)
     
-    # Create __init__.py files if they don't exist
+    # Create _init_.py files if they don't exist
     init_files = [
-        "services/__init__.py",
-        "services/Local/__init__.py"
+        "services/_init_.py",
+        "services/Local/_init_.py"
     ]
     
     for init_file in init_files:
@@ -914,7 +572,7 @@ if __name__ == "__main__":
                 f.write("# Package initialization file\n")
             print(f"Created {init_file}")
     
-    print("Starting EV Route Planner API V3 with Coverage Analysis...")
+    print("Starting EV Route Planner API V3...")
     print("Features:")
     print("- Dynamic efficiency calculation (elevation + weather + traffic)")
     print("- Strategic battery utilization algorithms") 
@@ -922,28 +580,16 @@ if __name__ == "__main__":
     print("- Permanent elevation caching + hourly weather updates")
     print("- A* fallback with battery utilization optimization")
     print("- Comprehensive route analysis and partial route handling")
-    print("- Battery-aware coverage area analysis with multi-hop reachability")
-    print("- Optimized polygon generation with pre-filtering and caching")
     print(f"- Route service status: {'Available' if route_service else 'Unavailable'}")
-    print(f"- Coverage service status: {'Available' if coverage_service else 'Unavailable'}")
     
     if route_service is None:
         print("\nWARNING: EV Route Service V3 not available!")
         print("Make sure services/Local/ev_route_service_v3.py exists and contains the reorganized code.")
         print("Install dependencies: pip install geopy requests")
     else:
-        print(f"✓ Route Service loaded: {service_info['service_name'] if service_info else 'EV Route Service V3'}")
+        print(f"✓ Service loaded: {service_info['service_name'] if service_info else 'EV Route Service V3'}")
         if service_info:
             print(f"✓ Algorithm: {service_info['algorithm']}")
             print(f"✓ Version: {service_info['version']}")
     
-    if coverage_service is None:
-        print("\nWARNING: Coverage Area Service not available!")
-        print("Make sure coverage_area_service_v2.py exists in the same directory.")
-        print("Install dependencies: pip install scipy shapely numpy")
-    else:
-        print("✓ Coverage Service loaded with advanced optimizations")
-        print("✓ Pre-filtering, caching, and early termination enabled")
-    
     uvicorn.run(app, host="0.0.0.0", port=8000)
->>>>>>> 97733a62711d1f76b5885349024c394fb73f051f
